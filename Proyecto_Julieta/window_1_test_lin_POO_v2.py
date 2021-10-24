@@ -26,12 +26,14 @@ root.wm_title("Teste Lin")
 MAIN_ROOT = Path(__file__).parent.absolute()
 background = ImageTk.PhotoImage(file=(MAIN_ROOT / "fondo.png").__str__())
 
+DB_STEPS = 0.2
+DB_LEVELS = [db/10 for db in range(int(DB_STEPS * 10), 11, int(DB_STEPS * 10))]
 
 class SoundOption:
     def __init__(self, name: str, frecuency: int = 60, main_root: Path = MAIN_ROOT) -> None:
         self.name = name
         self.frecuency = frecuency
-        self.volume = db_levels[0]
+        self.volume = DB_LEVELS[0]
 
         self.sound = mixer.Sound((main_root / f"{self.name}.wav").__str__())
         self.image = PhotoImage(
@@ -43,8 +45,8 @@ class SoundOption:
         self.sound.play()
     
     def add_volume(self):
-        if not self.volume >= db_levels[-1]:
-            self.volume += db_steps
+        if not self.volume >= DB_LEVELS[-1]:
+            self.volume += DB_STEPS
 
 
 class Alert:
@@ -68,9 +70,8 @@ alert_options_names = ["error", "applause-1"]
 sound_options_list = [SoundOption(name, frec) for name, frec in sound_options_dict.items()]
 alerts_dict = {name: Alert(name) for name in alert_options_names}
 
-db_steps = 0.2
-db_levels = [db/10 for db in range(db_steps * 10, 11, db_steps * 10)]
-results_dict = {sound_option.name: {db: 0 for db in db_levels} for sound_option in sound_options_list}
+
+results_dict = {sound_option.name: {db: 0 for db in DB_LEVELS} for sound_option in sound_options_list}
 
 class window1(Frame):
 

@@ -8,7 +8,7 @@ from typing import Generator
 from pygame import mixer
 import random
 from pathlib import Path
-from PIL import ImageTk
+from PIL import ImageTk, Image
 
 mixer.init()
 root = Tk()
@@ -35,9 +35,9 @@ class SoundOption:
         self.frecuency = frecuency
         self.volume = DB_LEVELS[0]
 
-        self.sound = mixer.Sound((main_root / f"{self.name}.wav").__str__())
+        self.sound = mixer.Sound((main_root / "sounds" / f"{self.name}.wav").__str__())
         self.image = PhotoImage(
-            file=(main_root / f"{self.name}.png").__str__())
+            file=(main_root / "images" / f"{self.name}.gif").__str__())
     
     def play(self):
         # Cambiar para cada frecuencia...
@@ -52,7 +52,7 @@ class SoundOption:
 class Alert:
     def __init__(self, name: str, main_root: Path = MAIN_ROOT) -> None:
         self.name = name
-        self.sound = mixer.Sound((main_root / f"{self.name}.wav").__str__())
+        self.sound = mixer.Sound((main_root / "sounds" / f"{self.name}.wav").__str__())
 
 # sonidos y su frecuencia
 sound_options_dict = {

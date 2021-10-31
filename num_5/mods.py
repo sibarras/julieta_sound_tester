@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import Tk
-from pathlib import Path
 import random
 import time
 
@@ -11,17 +10,21 @@ def rgb_to_hex(r: int, g: int, b: int) -> str:
 
     return "#%02x%02x%02x" % (r,g,b)
 
-
+# yo pense que era el orden con que salian de izq a derecha
+# Mira viejo
+# si viejo, descargalo de l gihub
 class Window(tk.Frame):
-    MAX_COUNT = 10
+    MAX_COUNT = 5
     def __init__(self, master: Tk, window_title: str, color_options_dict: dict) -> None:
         self.color_dict = color_options_dict
         self.colors_list = [(name, hex_code) for name, hex_code in self.color_dict.items()]
         self.color_order = self.colors_list[:]
         self.current_ans = []
         self.counter = 0
+        self.wait_time = 5
         self.results_dict = {}
         self.place_generator = self.reset_place_generator()
+        self.start = time.time()
 
         master.geometry(f"{master.winfo_screenwidth()}x{master.winfo_screenheight()}")
         master.wm_title(window_title)
@@ -42,13 +45,19 @@ class Window(tk.Frame):
         
         
     def next_color_order_generation(self):
-        random.shuffle(self.colors_list)
+        if self.counter >= self.MAX_COUNT:
+            self.graph_results()
+            self.master.destroy()
+            return
+        
         self.color_order = self.colors_list[:]
+        random.shuffle(self.color_order)
         self.reset_place_generator()
         self.create_colors()
         self.main_button_text.set("Waiting...")
         self.main_button["state"] = tk.DISABLED
-        self.wait_observation_time()
+        self.wait_observation_time(self.wait_time)
+        self.color_order = self.color_order[::-1]
         self.show_possible_options()
 
     def reset_place_generator(self) -> None:
@@ -62,21 +71,23 @@ class Window(tk.Frame):
 
     def destroy_colors(self) -> None:
         """ elimina los botones de las opciones para cada uno de las imagenes """
-        for name, _ in self.colors_list:
-            self.__getattribute__(f"{name}_color").destroy()
-        self.reset_place_generator()
-
+        self.canv.destroy()
+        
     def destroy_buttons(self) -> None:
         """ elimina los botones de las opciones para cada uno de las imagenes """
         for name, _ in self.colors_list:
             self.__getattribute__(f"{name}_button").destroy()
-        self.reset_place_generator()
 
     def create_colors(self) -> None:
-        for name, hex_code in self.color_order:
-            self.__setattr__(f"{name}_color", tk.Frame(self, bg=hex_code))
-            self.__getattribute__(f"{name}_color").place(**self.place_generator.__next__())
+        self.canv = tk.Canvas(self, width=1152, height=1152)
+        self.canv.pack()
 
+        colors_sizes = ((x, y, x+w, y+h) for x, y, w, h in [tuple(val.values()) for val in self.place_generator])
+        for name, hex_code in self.color_order:
+            print(name, hex_code, "to be created!")
+            self.canv.create_rectangle(*colors_sizes.__next__(), outline=hex_code, fill=hex_code)
+            self.wait_observation_time(1)
+        
     def create_buttons(self) -> None:
         for name, hex_code in self.color_dict.items():
             self.__setattr__(f"{name}_button", tk.Button(
@@ -85,40 +96,49 @@ class Window(tk.Frame):
                 command=self.button_pressed(name)))
             self.__getattribute__(f"{name}_button").place(**self.place_generator.__next__())
     
-    def wait_observation_time(self) -> None:
-        time.sleep(5)
+    def wait_observation_time(self, time: int) -> None:
+        """time to wait in seconds as input"""
+        var = tk.IntVar()
+        self.master.after(time * 1000, var.set, 1)
+        print("waiting...")
+        self.master.wait_variable(var)
 
     def show_possible_options(self) -> None:
-        self.main_button_text.set("Press the colors in the rigth order")
+        self.main_button_text.set("Selecciona en orden")
         self.destroy_colors()
         self.reset_place_generator()
         self.create_buttons()
 
     def button_pressed(self, button_name):
         def check_button(button_name=button_name) -> None:
-            assert self.color_order.__len__ > 0
+            remaining = len(self.color_order)
+            assert remaining > 0
 
             next_color, _ = self.color_order.pop()
+            remaining -= 1
+            
             if button_name != next_color:
                 print("Bad option pressed", button_name)
                 self.current_ans.append((next_color, False))
-                return
             
-            print("Correct:", button_name)
-            self.current_ans.append((next_color, True))
-
-            if self.color_order.__len__() == 0:
+            else:
+                print("Correct:", button_name)
+                self.current_ans.append((next_color, True))
+            
+            self.__getattribute__(f"{button_name}_button").destroy()
+            
+            if remaining <= 0:
                 success = all([ans for _, ans in self.current_ans])
                 print("You have some fails in this color order." if not success else "Well done")
+                self.wait_time = self.wait_time - 1 if success and self.wait_time > 1 else self.wait_time
                 self.save_result()
                 self.current_ans = []
 
-                self.main_button_text.set("Next Test")
+                self.main_button_text.set("Siguiente Prueba" if self.counter < self.MAX_COUNT else "Ver Resultados")
                 self.main_button["state"] = tk.NORMAL
-                self.destroy_buttons()
                 self.reset_place_generator()
         return check_button
-    
+    # xopa esperame.. esperame..
     def graph_results(self):
         print(self.results_dict)
 
@@ -126,14 +146,14 @@ class Window(tk.Frame):
         self.results_dict[self.counter] = {name: ans for name, ans in self.current_ans}
         self.counter += 1
 
-        if self.counter <= self.MAX_COUNT:
-            self.graph_results()
-            self.master.destroy()
+
 
 
 if __name__ == "__main__":
     color_options_dict = {
-        "red": rgb_to_hex(0,0,255)
+        "blue": rgb_to_hex(0,0,255),
+        "green": rgb_to_hex(0,255, 0),
+        "red": rgb_to_hex(255,0,0),
     }
     
     print(color_options_dict)

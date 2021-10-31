@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import Tk
 import random
 import time
+import pandas as pd
 
 
 def rgb_to_hex(r: int, g: int, b: int) -> str:
@@ -40,7 +41,7 @@ class Window(tk.Frame):
         self.main_button.place(x=476, y=40, width=200, height=50)
         
         # boton de salida
-        self.buttonexit = tk.Button(self, text="salir", command=root.destroy)
+        self.buttonexit = tk.Button(self, text="salir", command=master.destroy)
         self.buttonexit.place(x=476, y=640, width=200, height=50)
         
         
@@ -140,7 +141,9 @@ class Window(tk.Frame):
         return check_button
     # xopa esperame.. esperame..
     def graph_results(self):
-        print(self.results_dict)
+        df = pd.Dataframe(self.results_dict)
+        print(df)
+        # print(self.results_dict)
 
     def save_result(self):
         self.results_dict[self.counter] = {name: ans for name, ans in self.current_ans}
@@ -160,3 +163,5 @@ if __name__ == "__main__":
     root = Tk()
     app = Window(root, "Practice", color_options_dict)
     app.mainloop()
+
+# para que corras el archivo main.. no el mods.. como este

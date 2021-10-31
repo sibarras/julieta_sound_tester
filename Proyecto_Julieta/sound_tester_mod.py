@@ -12,13 +12,15 @@ import pandas as pd
 class SoundOption:
     DB_STEPS = 0.2
     DB_LEVELS = [db/10 for db in range(int(DB_STEPS * 10), 11, int(DB_STEPS * 10))]
-    FREC_LEVELS = [125, 250, 500, 1000, 2000, 4000]
+    mixer.init()
+    # FREC_LEVELS = [125, 250, 500, 1000, 2000, 4000]
 
-    def __init__(self, name: str, main_root: Path) -> None:
+    def __init__(self, name: str, frecuency: int, main_root: Path) -> None:
         """Constructor para las opciones de sonido. Debe haber iniciado """
         self.name = name
         self.main_root = main_root
         self.used_frecuencies = []
+        self.FREC_LEVELS = [frecuency]
         self.frecuency = random.choice(self.FREC_LEVELS)
         self.volume = self.DB_LEVELS[0] # Comienza con el primer valor de los niveles (DB STEPS)
         self.results = {frec: {db_level: 0 for db_level in self.DB_LEVELS} for frec in self.FREC_LEVELS}
@@ -29,7 +31,7 @@ class SoundOption:
     
     def play(self):
         """ Este metodo es para reproducir el sonido de este objeto segun el volumen seteado """
-        mixer.init(self.frecuency)
+        # mixer.init(self.frecuency)
         mixer.music.load((self.main_root / "sounds" / f"{self.name}.wav").__str__())
         mixer.music.set_volume(self.volume)
         mixer.music.play()
@@ -103,12 +105,12 @@ class MainWindow(Frame):
         self.create_widgets(master)
 
         # Window Background
-        background = ImageTk.PhotoImage(file=(main_root / "fondo.png").__str__())
-        # self.canvas1 = Canvas(master, width=1152, height=1152).create_image(
-        #     0, 0, image=background, anchor="nw")
+        background = ImageTk.PhotoImage(file=(main_root / "images" / "fondo.gif").__str__())
+        self.canvas1 = Canvas(master, width=1152, height=1152).create_image(
+            0, 0, image=background, anchor="nw")
 
     def store_sounds_information(self, sound_options_dict: dict) -> None:
-        self.sound_options_list = create_sound_options(sound_options_dict, self.main_dir)
+        self.sound_options_list = [SoundOption(name, frec, self.main_dir) for name, frec in sound_options_dict.items()]
         self.total_sound_options_list = self.sound_options_list[:]
 
     def create_buttons(self) -> None:
@@ -149,9 +151,11 @@ class MainWindow(Frame):
         self.buttonexit.place(x=476, y=640, width=200, height=50)
 
     def graph_results(self, results_dict: dict) -> None:
+        plt.figure()
+        ax = plt.axes()
         for name, res in results_dict.items():
             df = pd.DataFrame(res)
-            df.plot(kind="line")
+            df.plot(kind="line", ax=ax)
             print("\n\n", name)
             print(df)
 
@@ -170,7 +174,7 @@ class MainWindow(Frame):
         self.graph_results(self.results_dict)
         self.is_the_final = True
 
-        root.destroy()
+        self.master.destroy()
 
     def random_sound_selection(self):
         if self.sound_options_list == None:
@@ -245,24 +249,20 @@ class MainWindow(Frame):
         return check_election
 
 
-def create_sound_options(name_list: list, root_dir: Path) -> list:
-    return [SoundOption(name, root_dir) for name in name_list]
-
-
 if __name__ == "__main__":
     root = Tk()
     ROOT_DIR = Path(__file__).parent.absolute()
 
     # sonidos y su frecuencia
     # el limite de cuantos sonidos pueden tener esta en el generador de posiciones del window
-    sounds_names_list = [
-        "a",
-        "m",
-        "u",
-        "s",
-        "sh",
-        "i"
-    ]
+    sounds_names_dict = {
+        "a": 500,
+        "m": 125,
+        "u": 250,
+        "s": 4000,
+        "sh": 2000,
+        "i": 1000
+    }
 
-    app = MainWindow(root, "Teste Lin", sounds_names_list, ROOT_DIR)
+    app = MainWindow(root, "Teste Lin", sounds_names_dict, ROOT_DIR)
     app.mainloop()

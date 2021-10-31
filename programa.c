@@ -1,27 +1,22 @@
-String comdata = "";
-int lastLength = 0;
+const int lastLength = 0;
 
-int bzr1 = 5;
-int bzr2 = 6;
-int bzr3 = 9;
-int bzr4 = 10;
+const int bzr1 = 5;
+const int bzr2 = 6;
+const int bzr3 = 9;
+const int bzr4 = 10;
 
 int buzzerOptions[4] = { bzr1, bzr2, bzr3, bzr4 };
 
-int btn1 = 2;
-int btn2 = 3;
-int btn3 = 4;
-int btn4 = 7;
+const int btn1 = 2;
+const int btn2 = 3;
+const int btn3 = 4;
+const int btn4 = 7;
 
 int buttonOptions[4] = { btn1, btn2, btn3, btn4 };
 
 int freq[6] = {125 ,250, 500, 1000, 2000, 4000};
 
-unsigned long startTime = millis();
-long interval = 5000;
-
-bool soundState = false;
-
+const long interval = 5000;
 
 void setup() {
     Serial.begin(9600);
@@ -35,6 +30,10 @@ void setup() {
     pinMode(btn2, INPUT);
     pinMode(btn3, INPUT);
     pinMode(btn4, INPUT);
+
+    unsigned long startTime = millis();
+    String comdata = "";
+    bool soundState = false;
 }
 
 

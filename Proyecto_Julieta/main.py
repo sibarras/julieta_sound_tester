@@ -9,16 +9,16 @@ def main():
 
     # sonidos y su frecuencia
     # el limite de cuantos sonidos pueden tener esta en el generador de posiciones del window
-    sounds_names_list = [
-        "a",
-        "m",
-        "u",
-        "s",
-        "sh",
-        "i"
-    ]
+    sounds_names_dict = {
+        "a": 500,
+        "m": 125,
+        "u": 250,
+        "s": 4000,
+        "sh": 2000,
+        "i": 1000
+    }
 
-    app = MainWindow(root, "Teste Lin", sounds_names_list, ROOT_DIR)
+    app = MainWindow(root, "Teste Lin", sounds_names_dict, ROOT_DIR)
     app.mainloop()
 
 
